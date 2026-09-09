@@ -16,38 +16,46 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout source code
         uses: actions/checkout@v4
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.35.0'
+          flutter-version: "3.35.0"
           channel: stable
           cache: true
 
       - name: Check Flutter
         run: flutter --version
 
-      - name: Install dependencies
+      - name: Create Android platform
+        run: |
+          flutter create . \
+            --platforms=android \
+            --org=com.mohamedlolo \
+            --project-name=mohamed_lolo_game
+
+      - name: Get dependencies
         run: flutter pub get
 
       - name: Analyze project
         run: flutter analyze
         continue-on-error: true
 
-      - name: Build APK
+      - name: Build Release APK
         run: flutter build apk --release
 
-      - name: Rename APK
+      - name: Prepare APK
         run: |
-          mkdir -p build/release
+          mkdir -p release
           cp build/app/outputs/flutter-apk/app-release.apk \
-             build/release/Mohamed-Lolo.apk
+             release/Mohamed-Lolo.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Mohamed-Lolo-APK
-          path: build/release/Mohamed-Lolo.apk
+          path: release/Mohamed-Lolo.apk
+          if-no-files-found: error
           retention-days: 30
